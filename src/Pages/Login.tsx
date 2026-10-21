@@ -17,7 +17,7 @@ function Login() {
     }
 
     setError("");
-    // TODO: dispatch the login thunk here once the auth slice is ready
+   
     console.log("Login attempt:", { email, password });
   };
 

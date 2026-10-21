@@ -1,4 +1,3 @@
-// src/features/items/itemsSlice.ts
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import type { ShopItem } from "../types";
 
