@@ -1,68 +1,78 @@
+// src/pages/Login.tsx
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
-import "./Login.css";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { loginUser, clearError } from "../features/auth/authSlice";
+import "./Auth.css";
+
+
+
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { status, error } = useAppSelector((state) => state.auth);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!email.trim() || !password.trim()) {
-      setError("Please fill in both fields.");
+      setLocalError("Please fill in both fields.");
       return;
     }
 
-    setError("");
-   
-    console.log("Login attempt:", { email, password });
+    setLocalError("");
+    dispatch(clearError());
+
+    const result = await dispatch(loginUser({ email: email.trim(), password }));
+    if (loginUser.fulfilled.match(result)) navigate("/home");
   };
 
   return (
-    <div className="login-page">
-      <form className="login-card" onSubmit={handleSubmit}>
-        <h1 className="login-logo">ShopList</h1>
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <div className="brand">
+          <div className="brand-mark">S</div>
+          <span className="brand-name">ShopList</span>
+        </div>
+
         <h2>Welcome back</h2>
-        <p className="login-subtitle">Log in to manage your shopping list.</p>
+        <p className="auth-subtitle">Log in to see your shopping lists.</p>
 
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <label htmlFor="password">Password</label>
-        <div className="password-wrapper">
+        <div className="field">
+          <label htmlFor="password">Password</label>
           <input
             id="password"
-            type={showPassword ? "text" : "password"}
+            type="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button
-            type="button"
-            className="toggle-btn"
-            onClick={() => setShowPassword((prev) => !prev)}
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
         </div>
 
-        {error && <p className="login-error">{error}</p>}
+        {(localError || error) && <p className="auth-error">{localError || error}</p>}
 
-        <button type="submit" className="login-btn">
-          Log in
+        <button type="submit" className="btn-primary" disabled={status === "loading"}>
+          {status === "loading" ? "Logging in..." : "Log in"}
         </button>
 
-        <p className="login-footer">
-          Don't have an account? <Link to="/register">Register</Link>
+        <p className="auth-footer">
+          New here? <Link to="/register">Create an account</Link>
         </p>
       </form>
     </div>
